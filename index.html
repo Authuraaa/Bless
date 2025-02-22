@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地球online温馨提示</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Merriweather:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* 设置body的样式 */
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+      transition: background-image 1s ease;
+    }
+
+    /* 设置文本的样式 */
+    .text {
+      color: white;
+      font-size: 24px;
+      font-family: Georgia, serif;
+      line-height: 1.6;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      margin: 20px;
+      display: none;
+    }
+
+    /* 动画样式 */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 初始状态：隐藏标题和段落 */
+    .text h2,
+    .text p {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+
+    /* 高级按钮样式 */
+    .toggle-button {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      font-size: 18px;
+      color: white;
+      background: linear-gradient(270deg, #ff7e5f, #feb47b);
+      border: none;
+      border-radius: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      outline: none;
+      transition: scale 0.3s ease, box-shadow 0.3s ease, background 0.5s ease, opacity 2s ease;
+    }
+
+    /* 按钮悬停效果 */
+    .toggle-button:hover {
+      scale: 1.05;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(270deg, #ff5f6d, #ffc371);
+    }
+
+    /* 按钮点击动画 */
+    .toggle-button:active {
+      scale: 0.95;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 动态光晕效果 */
+    .toggle-button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 30px;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .toggle-button:hover::before {
+      opacity: 1;
+    }
+
+    /* 覆盖层样式 */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(0, 0, 0, 0.2));
+      backdrop-filter: blur(5px);
+      opacity: 0;
+      transition: opacity 2s ease;
+      pointer-events: none;
+    }
+
+    /* 时间字体样式 */
+    .time-font {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 18px;
+      color: #00ff00;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    /* 生日快乐特效 */
+    .birthday-happy {
+      font-size: 36px;
+      color: #ffcc00;
+      text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+      animation: twinkle 2s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% {
+        text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+      }
+      50% {
+        text-shadow: 0 0 20px #ffcc00, 0 0 30px #ffcc00, 0 0 40px #ffcc00;
+      }
+    }
+
+    /* 玩家名字样式 */
+    .player-name {
+      color: #D8BFD8;
+      font-weight: bold;
+      text-shadow: 0 0 5px #D8BFD8, 0 0 10px #D8BFD8;
+    }
+
+    /* 新增按钮样式 */
+    .extra-button {
+      position: absolute;
+      bottom: 100px;
+      left: 245px;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      background: linear-gradient(270deg, #333333, #555555);
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: scale 0.3s ease, box-shadow 0.3s ease, background 0.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .extra-button:hover {
+      scale: 1.05;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+      background: linear-gradient(270deg, #444444, #666666);
+    }
+
+    .extra-button:active {
+      scale: 0.95;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 第三张背景中的按钮样式 */
+    .message-button,
+    .third-background-button,
+    .hidden-button,
+    .home-button {
+      position: absolute;
+      padding: 14px 28px;
+      font-size: 18px;
+      color: #333333;
+      background: linear-gradient(270deg, #ffffff, #f0f0f0);
+      border: none;
+      border-radius: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      outline: none;
+      transition: scale 0.3s ease, box-shadow 0.3s ease, background 0.5s ease, opacity 2s ease;
+      opacity: 0;
+    }
+
+    .message-button:hover,
+    .third-background-button:hover,
+    .hidden-button:hover,
+    .home-button:hover {
+      scale: 1.05;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      background: linear-gradient(270deg, #f8f8f8, #e0e0e0);
+    }
+
+    .message-button:active,
+    .third-background-button:active,
+    .hidden-button:active,
+    .home-button:active {
+      scale: 0.95;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 按钮的垂直间距 */
+    .message-button {
+      top: 150px;
+      left: 100px;
+    }
+
+    .third-background-button {
+      top: 250px;
+      left: 100px;
+    }
+
+    .hidden-button {
+      top: 20px;
+      right: 20px;
+      /* 隐藏按钮放在右上角 */
+    }
+
+    .home-button {
+      bottom: 20px;
+      left: 20px;
+      /* 返回主页按钮放在左下角 */
+    }
+
+    /* 隐藏按钮样式 */
+    .hidden-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      cursor: pointer;
+      outline: none;
+      transition: none;
+      /* 移除所有过渡效果 */
+      opacity: 0;
+      /* 默认隐藏 */
+    }
+
+    /* 贺卡背景样式 */
+    .message-background {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f0f8ff, #e0ffff);
+      transition: opacity 2s ease;
+      opacity: 0;
+    }
+
+    /* 贺卡文本样式 */
+    .message-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 900px;
+      padding: 20px;
+      border: 2px solid #cccccc;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333333;
+      font-size: 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .message-text h2 {
+      font-family: "Lobster", cursive;
+      font-size: 32px;
+      color: #ff6347;
+      text-shadow: 0 0 5px #ff6347;
+    }
+
+    .message-text p {
+      font-family: "Merriweather", serif;
+      font-size: 20px;
+      line-height: 1.6;
+      color: #333333;
+    }
+
+    /* 寄语背景样式 */
+    .message-back-background {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #ffcccb, #ffe4e1);
+      transition: opacity 2s ease;
+      opacity: 0;
+    }
+
+    /* 寄语文本样式 */
+    .message-back-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 900px;
+      padding: 20px;
+      border: 2px solid #ff8080;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333333;
+      font-size: 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .message-back-text h2 {
+      font-family: "Roboto", sans-serif;
+      font-size: 32px;
+      color: #ff4500;
+      text-shadow: 0 0 5px #ff4500;
+    }
+
+    .message-back-text p {
+      font-family: "Roboto", sans-serif;
+      font-size: 20px;
+      line-height: 1.6;
+      color: #333333;
+    }
+
+    /* 返回主页按钮样式 */
+    .home-button {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: #ffffff;
+      background: linear-gradient(270deg, #ff7e5f, #feb47b);
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      outline: none;
+      transition: scale 0.3s ease, box-shadow 0.3s ease, background 0.5s ease;
+    }
+
+    .home-button:hover {
+      scale: 1.1;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(270deg, #ff5f6d, #ffc371);
+    }
+
+    .home-button:active {
+      scale: 0.9;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 返回按钮样式 */
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: #ffffff;
+      background: linear-gradient(270deg, #ff7e5f, #feb47b);
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      outline: none;
+      transition: scale 0.3s ease, box-shadow 0.3s ease, background 0.5s ease;
+    }
+
+    .back-button:hover {
+      scale: 1.1;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(270deg, #ff5f6d, #ffc371);
+    }
+
+    .back-button:active {
+      scale: 0.9;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 文字特效 */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-text h2,
+    .message-text p,
+    .message-back-text h2,
+    .message-back-text p {
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+    }
+
+    /* 隐藏按钮弹出样式 */
+    .hidden-message-background {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f0f8ff, #e0ffff);
+      transition: opacity 2s ease;
+      opacity: 0;
+    }
+
+    .hidden-message-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 900px;
+      padding: 20px;
+      border: 2px solid #cccccc;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333333;
+      font-size: 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .hidden-message-text h2 {
+      font-family: "Lobster", cursive;
+      font-size: 32px;
+      color: #ff6347;
+      text-shadow: 0 0 5px #ff6347;
+    }
+
+    .hidden-message-text p {
+      font-family: "Merriweather", serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333333;
+    }
+  </style>
+</head>
+<body>
+  <div class="text">
+    <br>
+    <h2>&nbsp;&nbsp;&nbsp;&nbsp;地球🌍 online 温馨提示：</h2>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;恭喜玩家 <span class="player-name">梁泳诗</span>：</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;您已登录游戏：<span id="login-time" class="time-font"> 00天00小时00分00秒</span></p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;祝贺您十分出色地完成了前面的19章主线任务。</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;并成功开启新的第20章主线剧情。</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为此，我们诚挚地祝贺您：</p>
+    <p class="birthday-happy">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;生日快乐！</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;请您继续探索主线，解锁更多剧情，触发特殊彩蛋。</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;祝您游戏愉快，生活顺利！</p>
+    <button class="extra-button">点击继续</button>
+    <br><br>
+  </div>
+  <button class="toggle-button">开启20级主线</button>
+  <div class="overlay"></div> <!-- 添加覆盖层 -->
+
+  <!-- 第三张背景中的按钮 -->
+  <button class="message-button">祝福</button>
+  <button class="third-background-button">寄语</button>
+  <button class="hidden-button"></button> <!-- 隐藏按钮 -->
+  <button class="home-button">返回主页</button> <!-- 返回主页按钮 -->
+
+  <!-- 贺卡背景 -->
+  <div class="message-background">
+    <button class="back-button">返回</button>
+    <div class="message-text">
+      <h2>生日祝福</h2>
+      <p>卿之二十华诞，诚为嘉辰，余心甚喜，特以拙文，遥寄祝福。</p>
+      <p>忆昔弱冠之年，古之贤者，多有立身立德之举，</p>
+      <p>而今卿亦至斯龄，风华正茂，如日初升，其道大光。</p>
+      <p>廿载光阴，卿沐春风化雨，学识渐丰，德行日进，诚为可喜可贺之事。</p>
+      <p>愿卿于此后岁月，心怀壮志，志在四方，不为浮云遮望眼，不为俗世扰清心。</p>
+      <p>虽前路或有荆棘，然望卿以坚韧之志，破浪前行，</p>
+      <p>如松柏之有节，经霜犹茂；如梅花之凌寒，独自芬芳。</p>
+      <p>且愿卿常怀赤子之心，温柔待人，以善为本，以和为贵。</p>
+      <p>于繁华尘世中，不迷失本心，不染世俗之垢，保有一份澄澈与宁静。</p>
+      <p>愿卿之生活，如诗如画，如歌如梦，既有琴瑟之和鸣，亦有书卷之馨香。</p>
+      <p>愿卿之志向，如鲲鹏展翅，扶摇直上九万里；</p>
+      <p>愿卿之情操，如芝兰生于深林，不以无人而不芳。</p>
+      <p>愿卿之人生，如长河之奔流，虽有曲折，终归于海；如明月之高悬，虽有盈缺，终照四方。</p>
+      <p>值此良辰，愿卿福泽绵长，岁岁平安，年年如意。</p>
+      <p>愿卿之未来，繁花似锦，前程似锦，万事皆顺，诸愿皆成。</p>
+      <p>敬祝卿弱冠之诞，欢愉无极，永绥吉庆，福泽无疆。</p>
+    </div>
+  </div>
+
+  <!-- 寄语背景 -->
+  <div class="message-back-background">
+    <button class="back-button">返回</button>
+    <div class="message-back-text">
+      <h2>寄语</h2>
+      <p>20岁是人生崭新的起点，</p>
+      <p>是黎明破晓后的第一缕曙光，</p>
+      <p>是充满希望与活力的清晨。</p>
+      <p>每一步的努力都值得被铭记。</p>
+      <p>愿你在未来的日子里，继续勇敢前行。</p>
+      <p>愿你的每一步都充满力量和希望。</p>
+      <p>祝你一切顺利，幸福满满。</p>
+    </div>
+  </div>
+
+  <!-- 隐藏按钮弹出背景 -->
+  <div class="hidden-message-background">
+    <button class="back-button">返回</button>
+    <div class="hidden-message-text">
+      <h2>心里话</h2>
+      <p>不知道你能不能看到这段话，但是我还是想向你说出这段话，时间也会一直慢慢的流淌下去，我能给你做这些的机会实在是不多了</p>
+      <p>我只能在你嫁人前努力做这些，幻想你能回来，你嫁人之后，我就彻底消失了，不过，你要是能幸福的话，我也会感到很开心的</p>
+      <p>想起初中三年，跟你在一起的时光，我认为是我这辈子为数不多的快乐时光了，那会多好啊，和你在一起，做梦都能笑醒</p>
+      <p>现在人人都觉得我是傻子，不去追逐幸福，只会停留在原地，可是，我已经把我的心完全给你了，已经失去爱人的能力了</p>
+      <p>我知道我是有病，看到别人一点兴趣都没有，跟个小丑一样天天骚扰你，可是我又能做什么呢</p>
+      <p>从校服到婚纱难道真的做不到吗，去年看着初中最后一对分手，我的心便掉到了冰点</p>
+      <p>知道中考为什么提出分手吗，老师父母同学都说，我和你一直谈会害了你，让我和你分手，这样才能激励你</p>
+      <p>再加上你当时又做了一些令我十分难过的事情，一气之下竟然接受了意见，我不知道结果会这样发展，竟然成了至今令我耿耿于怀的错误决定</p>
+      <p>当你说回不去了，向前看吧，我的心就已经痛到不行了，我也知道，我说了很多谎话骗你，我很害怕失去你，我只能尝试用谎话留住你</p>
+      <p>可惜结果却事与愿违，真正爱过的人怎么可能放的下，我们之间有着太多太多的误会了，就不能从头开始嘛......</p>
+      <p>回不去了，但是如果能从头开始我这辈子再也不会弄丢你</p>
+      <p>可惜这只是小丑哥布林在临死前的臆想罢了</p>
+      <p>想起之前对你承诺，我是真的想带你去实现啊，如果上天能再给我一次机会的话，我一定不会重蹈覆辙</p>
+      <p>最后的最后，还是希望你不要看到这段话好了，毕竟我知道你对我恨之入骨</p>
+      <p>我只希望我能用时间慢慢释怀吧，要是还能紧紧再抱你一次多好啊，我一定不会放开你</p>
+      <p>希望20岁的你越来越好吧，不要忘了我！！！</p>
+      <p>在低谷期的时候，想想还有人在背后默默地一直爱着你呢，你一直都是最棒的，要相信你自己</p>
+      <p>好了我的梦该醒了，不管怎么样我都想说出来，我爱你梁泳诗</p>
+      <p>我会用时间证明我有多爱你</p>
+    </div>
+  </div>
+
+  <!-- 添加音频元素 -->
+  <audio id="wind-audio" src="wind.mp3"></audio>
+  <audio id="music-audio" src="music.mp3"></audio>
+
+  <script>
+    // 获取按钮、文本和覆盖层
+    const button = document.querySelector('.toggle-button');
+    const text = document.querySelector('.text');
+    const overlay = document.querySelector('.overlay');
+    const extraButton = document.querySelector('.extra-button');
+    const messageButton = document.querySelector('.message-button'); // 贺卡按钮
+    const thirdBackgroundButton = document.querySelector('.third-background-button'); // 寄语按钮
+    const hiddenButton = document.querySelector('.hidden-button'); // 隐藏按钮
+    const homeButton = document.querySelector('.home-button'); // 返回主页按钮
+    const messageBackground = document.querySelector('.message-background'); // 贺卡背景
+    const messageText = document.querySelectorAll('.message-text p, .message-text h2'); // 贺卡文本
+    const messageBackBackground = document.querySelector('.message-back-background'); // 寄语背景
+    const messageBackText = document.querySelectorAll('.message-back-text p, .message-back-text h2'); // 寄语文本
+    const hiddenMessageBackground = document.querySelector('.hidden-message-background'); // 隐藏消息背景
+    const hiddenMessageText = document.querySelectorAll('.hidden-message-text p, .hidden-message-text h2'); // 隐藏消息文本
+    const backButton = document.querySelectorAll('.back-button'); // 返回按钮
+
+    // 获取音频元素
+    const windAudio = document.getElementById('wind-audio');
+    const musicAudio = document.getElementById('music-audio');
+
+    // 初始背景为video.gif
+    document.body.style.backgroundImage = 'url("video.gif")';
+
+    // 获取显示时间的元素
+    const loginTimeSpan = document.getElementById('login-time');
+
+    // 开始时间（2005年3月24日 00:00:00）
+    const startTime = new Date('2005-03-24T00:00:00Z');
+
+    // 更新时间的函数
+    function updateTime() {
+      const now = new Date();
+      const timeDifference = now - startTime;
+
+      // 计算天数、小时、分钟和秒
+      const seconds = Math.floor(timeDifference / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      // 格式化时间
+      const formattedDays = String(days).padStart(2, '0');
+      const formattedHours = String(hours % 24).padStart(2, '0');
+      const formattedMinutes = String(minutes % 60).padStart(2, '0');
+      const formattedSeconds = String(seconds % 60).padStart(2, '0');
+
+      // 更新登录时间
+      loginTimeSpan.textContent = `${formattedDays}天${formattedHours}小时${formattedMinutes}分${formattedSeconds}秒`;
+
+      // 每秒更新一次
+      setTimeout(updateTime, 1000);
+    }
+
+    // 启动时间更新
+    updateTime();
+
+    // 点击按钮切换背景并显示文本
+    button.addEventListener('click', () => {
+      // 停止所有音频
+      windAudio.pause();
+      musicAudio.pause();
+      windAudio.currentTime = 0;
+      musicAudio.currentTime = 0;
+
+      // 播放wind.mp3
+      windAudio.play();
+
+      // 阶段1：覆盖层逐渐显示（2秒过渡）
+      overlay.style.opacity = 1;
+
+      // 同时让按钮逐渐消失（透明度变为0）
+      button.style.opacity = 0;
+
+      // 阶段2：等待覆盖层过渡完成后再切换背景
+      setTimeout(() => {
+        document.body.style.backgroundImage = 'url("Earth.jpg")'; // 切换到第二个背景
+        overlay.style.opacity = 0; // 恢复覆盖层透明度
+      }, 2000); // 等待2秒（与覆盖层过渡时间一致）
+
+      // 阶段3：在第二个背景显示后再显示文本
+      setTimeout(() => {
+        text.style.display = 'block'; // 显示文本
+        const title = document.querySelector('.text h2');
+        const paragraphs = document.querySelectorAll('.text p');
+
+        // 标题滑入动画
+        setTimeout(() => {
+          title.style.animation = 'slideUp 1s forwards';
+        }, 100); // 标题延迟100ms开始动画，避免瞬间显示
+
+        // 段落依次滑入动画
+        paragraphs.forEach((p, index) => {
+          setTimeout(() => {
+            p.style.animation = 'slideUp 1s forwards';
+          }, 3000 + index * 3000); // 标题动画结束后延迟1秒，每个段落间隔1秒
+        });
+
+        // 等待所有文本显示完毕后显示按钮
+        setTimeout(() => {
+          extraButton.style.opacity = 1; // 显示按钮
+        }, 3000 + paragraphs.length * 3000); // 所有段落动画完成后显示按钮
+      }, 4000); // 等待4秒（覆盖层过渡 + 1秒缓冲）
+    });
+
+    // 新增按钮的点击事件
+    extraButton.addEventListener('click', () => {
+      // 阶段1：覆盖层逐渐显示（2秒过渡）
+      overlay.style.opacity = 1;
+
+      // 阶段2：文本逐渐消失
+      text.style.transition = 'opacity 2s ease'; // 添加渐变透明度效果
+      text.style.opacity = 0; // 开始渐变透明
+
+      // 阶段3：等待文本消失和覆盖层过渡完成后再切换背景
+      setTimeout(() => {
+        text.style.display = 'none'; // 隐藏文本
+
+        // 确保背景图像加载完成
+        const newBackgroundImage = new Image();
+        newBackgroundImage.src = "video6.gif";
+        newBackgroundImage.onload = () => {
+          document.body.style.backgroundImage = 'url("video6.gif")'; // 切换回初始背景
+          overlay.style.opacity = 0; // 恢复覆盖层透明度
+
+          // 同时显示按钮
+          messageButton.style.opacity = 1;
+          thirdBackgroundButton.style.opacity = 1;
+          hiddenButton.style.opacity = 1; // 同时显示隐藏按钮
+          homeButton.style.opacity = 1; // 同时显示返回主页按钮
+        };
+      }, 2000); // 等待2秒（文本渐变透明 + 覆盖层过渡时间一致）
+    });
+
+    // 贺卡按钮点击事件
+    messageButton.addEventListener('click', () => {
+      // 隐藏其他按钮和背景
+      messageButton.style.opacity = 0;
+      thirdBackgroundButton.style.opacity = 0;
+      hiddenButton.style.opacity = 0; // 隐藏隐藏按钮
+      homeButton.style.opacity = 0; // 隐藏返回主页按钮
+
+      // 显示贺卡背景
+      messageBackground.style.display = 'block';
+      setTimeout(() => {
+        messageBackground.style.opacity = 1;
+      }, 100);
+
+      // 逐行显示贺卡文本
+      messageText.forEach((item, index) => {
+        setTimeout(() => {
+          item.style.opacity = 1;
+          item.style.transform = 'translateY(0)';
+        }, 1000 + index * 1000);
+      });
+    });
+
+    // 寄语按钮点击事件
+    thirdBackgroundButton.addEventListener('click', () => {
+      // 隐藏其他按钮和背景
+      messageButton.style.opacity = 0;
+      thirdBackgroundButton.style.opacity = 0;
+      hiddenButton.style.opacity = 0; // 隐藏隐藏按钮
+      homeButton.style.opacity = 0; // 隐藏返回主页按钮
+
+      // 显示寄语背景
+      messageBackBackground.style.display = 'block';
+      setTimeout(() => {
+        messageBackBackground.style.opacity = 1;
+      }, 100);
+
+      // 逐行显示寄语文本
+      messageBackText.forEach((item, index) => {
+        setTimeout(() => {
+          item.style.opacity = 1;
+          item.style.transform = 'translateY(0)';
+        }, 1000 + index * 1000);
+      });
+    });
+
+    // 隐藏按钮点击事件
+    hiddenButton.addEventListener('click', () => {
+      // 停止所有音频
+      windAudio.pause();
+      musicAudio.pause();
+      windAudio.currentTime = 0;
+      musicAudio.currentTime = 0;
+
+      // 播放music.mp3
+      musicAudio.play();
+
+      // 隐藏其他按钮和背景
+      messageButton.style.opacity = 0;
+      thirdBackgroundButton.style.opacity = 0;
+      hiddenButton.style.opacity = 0; // 隐藏隐藏按钮
+      homeButton.style.opacity = 0; // 隐藏返回主页按钮
+
+      // 显示隐藏消息背景
+      hiddenMessageBackground.style.display = 'block';
+      setTimeout(() => {
+        hiddenMessageBackground.style.opacity = 1;
+      }, 100);
+
+      // 逐行显示隐藏消息文本
+      hiddenMessageText.forEach((item, index) => {
+        setTimeout(() => {
+          item.style.opacity = 1;
+          item.style.transform = 'translateY(0)';
+        }, 1000 + index * 1000);
+      });
+    });
+
+    // 返回主页按钮点击事件
+    homeButton.addEventListener('click', () => {
+      // 重新加载页面，恢复到初始状态
+      window.location.reload();
+    });
+
+    // 返回按钮点击事件
+    backButton.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        // 隐藏当前背景
+        const currentBackground = btn.closest('.message-background, .message-back-background, .hidden-message-background');
+        currentBackground.style.opacity = 0;
+        setTimeout(() => {
+          currentBackground.style.display = 'none';
+        }, 2000);
+
+        // 恢复之前的界面
+        messageButton.style.opacity = 1;
+        thirdBackgroundButton.style.opacity = 1;
+        hiddenButton.style.opacity = 1; // 恢复隐藏按钮
+        homeButton.style.opacity = 1; // 恢复返回主页按钮
+      });
+    });
+  </script>
+</body>
+</html>
